@@ -12,6 +12,9 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'upload
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+client = MongoClient('mongodb://localhost:27017/')
+collection = client['logic']['logic']
+
 @app.route('/', methods = ['GET', 'POST'])
 def home():
     if request.method == 'POST':
@@ -54,8 +57,10 @@ def home():
 
 @app.route('/data')
 def data():
-    
-    return render_template()
+    logic = list(collection.find().sort('uploaded_at', -1))
+    for row in logic:
+        row['_id'] = str(row['_id'])
+    return render_template('download.html',logic=logic)
 
 @app.route('/download/<record_id>')
 def download_file(record_id):

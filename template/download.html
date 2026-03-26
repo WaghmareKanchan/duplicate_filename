@@ -1,11 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Download</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Download</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f4f0;
+      --surface:  #ffffff;
+      --border:   #e2e0d8;
+      --text:     #1a1916;
+      --muted:    #8a8880;
+      --accent:   #2563eb;
+      --accent-h: #1d4ed8;
+      --shadow:   0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+
+    .page-header {
+      max-width: 900px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-header h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+
+    .badge {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-left: 10px;
+    }
+
+    .btn-upload {
+      padding: 9px 18px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: .875rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .btn-upload:hover { background: var(--accent-h); }
+
+    /* Table card */
+    .card {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: fadeUp .4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: var(--bg);
+      text-align: left;
+      padding: 12px 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafaf8; }
+
+    tbody td {
+      padding: 14px 18px;
+      font-size: .9rem;
+      vertical-align: middle;
+    }
+
+    td.mono {
+      font-family: 'DM Mono', monospace;
+      font-size: .8rem;
+      color: var(--accent);
+    }
+
+    td.path {
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem;
+      color: var(--muted);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    td.date {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* saved-as pill */
+    .pill {
+      display: inline-block;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    /* Download button */
+    .btn-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background .12s, color .12s;
+    }
+    .btn-dl:hover { background: var(--accent); color: #fff; }
+
+    /* Empty state */
+    .empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty p { font-size: .9rem; margin-top: 8px; }
+  </style>
 </head>
 <body>
-    
+
+  <div class="page-header">
+    <div>
+      <span style="font-size:1.4rem;font-weight:600;letter-spacing:-.02em">
+        All Records
+      </span>
+      <span class="badge">{{ logic|length }}</span>
+    </div>
+    <a href="/" class="btn-upload">+ Upload File</a>
+  </div>
+
+  <div class="card">
+    {% if logic %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Original File</th>
+          <th>Saved As</th>
+          <th>Uploaded At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in logic %}
+        <tr>
+          <td class="mono">{{ row.ID }}</td>
+          <td>{{ row.name }}</td>
+          <td>{{ row.original_filename }}</td>
+          <td><span class="pill">{{ row.save_filename }}</span></td>
+          <td class="date">{{ row.uploaded_at.strftime('%Y-%m-%d %H:%M') if row.uploaded_at else '—' }}</td>
+          <td>
+            <a class="btn-dl" href="/download/{{ row._id }}">
+              ↓ Download
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      <div style="font-size:2rem">📭</div>
+      <p>No records yet. Upload your first file!</p>
+    </div>
+    {% endif %}
+  </div>
+
 </body>
 </html>

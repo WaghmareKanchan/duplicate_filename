@@ -64,8 +64,20 @@ def data():
 
 @app.route('/download/<record_id>')
 def download_file(record_id):
+    record = collection.find_one({'_id': ObjectId(record_id)})
+    if not record:
+        return 'Record not found.', 404
     
-    return()
+    file_path = record.get('file_location')
+    
+    if not file_path or not os.path.exists(file_path):
+        return 'File not found on disk,', 404
+    
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name=record['save_filename']
+    )
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

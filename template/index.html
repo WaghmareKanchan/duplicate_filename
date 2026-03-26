@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f4f0;
+      --surface:  #ffffff;
+      --border:   #e2e0d8;
+      --text:     #1a1916;
+      --muted:    #8a8880;
+      --accent:   #2563eb;
+      --accent-h: #1d4ed8;
+      --radius:   12px;
+      --shadow:   0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeUp .4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header { margin-bottom: 32px; }
+
+    .header .icon {
+      width: 44px; height: 44px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+
+    .header p {
+      font-size: .875rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+
+    label {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      position: relative;
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      margin-bottom: 22px;
+    }
+
+    .drop-zone:hover { border-color: var(--accent); background: #eff6ff; }
+    .drop-zone.drag  { border-color: var(--accent); background: #eff6ff; }
+
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+
+    .drop-zone .dz-icon { font-size: 26px; margin-bottom: 8px; }
+
+    .drop-zone p {
+      font-size: .875rem;
+      color: var(--muted);
+    }
+
+    .drop-zone span { color: var(--accent); font-weight: 600; }
+
+    #file-label {
+      display: inline-block;
+      margin-top: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      color: var(--accent);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: .95rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+
+    .btn:hover  { background: var(--accent-h); }
+    .btn:active { transform: scale(.98); }
+
+    .footer-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: .85rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .footer-link:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="icon">📁</div>
+      <h1>Upload a File</h1>
+      <p>Fill in your details and choose a file to upload.</p>
+    </div>
+
+    <form action="/" method="POST" enctype="multipart/form-data">
+
+      <div class="field">
+        <label>Record ID</label>
+        <input type="text" name="id" placeholder="e.g. REC-001" required>
+      </div>
+
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" placeholder="e.g. John Doe" required>
+      </div>
+
+      <label style="margin-bottom:6px;display:block">File</label>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" name="file" id="fileInput" required>
+        <div class="dz-icon">📄</div>
+        <p>Drag & drop or <span>click to browse</span></p>
+        <div id="file-label">No file chosen</div>
+      </div>
+
+      <button type="submit" class="btn">Upload File</button>
+    </form>
+
+    <a href="/data" class="footer-link">View all records →</a>
+  </div>
+
+  <script>
+    const zone  = document.getElementById('dropZone');
+    const input = document.getElementById('fileInput');
+    const label = document.getElementById('file-label');
+
+    input.addEventListener('change', () => {
+      label.textContent = input.files[0] ? input.files[0].name : 'No file chosen';
+    });
+
+    zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag'); });
+    zone.addEventListener('dragleave', ()  => zone.classList.remove('drag'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag');
+      if (e.dataTransfer.files.length) {
+        input.files = e.dataTransfer.files;
+        label.textContent = e.dataTransfer.files[0].name;
+      }
+    });
+  </script>
+</body>
+</html>
